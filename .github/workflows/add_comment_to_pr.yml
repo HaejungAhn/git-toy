@@ -3,7 +3,9 @@ name: Add comment to PR with "stacked/*" branch
 on:
   pull_request:
     branches: [ "main" ]
-
+    
+  workflow_dispatch:
+  
 jobs:
   add-comment:
     runs-on: ubuntu-latest
