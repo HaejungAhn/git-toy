@@ -1,0 +1,41 @@
+name: Add comment to PR with "stacked/*" branch
+
+on:
+  pull_request:
+    branches:
+      - 'stacked/*'
+
+jobs:
+  add-comment:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      
+      - name: Get files changed
+        run: |
+          FILES_CHANGED=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }})
+
+          # Get the first file changed
+          FIRST_FILE=$(echo "$FILES_CHANGED" | head -n 1)
+
+          echo "::set-output name=first_file::$FIRST_FILE"
+      
+      - name: Add comment
+        uses: actions/github-script@v4
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const firstFile = process.env.first_file;
+            const prAuthor = context.payload.pull_request.user.login;
+            const repoUrl = context.payload.repository.html_url;
+            const prNumber = context.payload.pull_request.number;
+            const commentBody = `${prAuthor}님, 해당 PR에 등록된 conversation들을 모두 resolve하신 후 머지 가능합니다.\n머지 완료된 브랜치는 [이 곳](${repoUrl}/branches/all?query=${{ github.head_ref }})에서 삭제하실 수 있습니다.`;
+            
+            github.issues.createComment({
+              issue_number: prNumber,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: commentBody
+            });
