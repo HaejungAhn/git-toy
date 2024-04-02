@@ -2,8 +2,7 @@ name: Add comment to PR with "stacked/*" branch
 
 on:
   pull_request:
-    branches:
-      - 'stacked/*'
+    branches: [ "main" ]
 
 jobs:
   add-comment:
